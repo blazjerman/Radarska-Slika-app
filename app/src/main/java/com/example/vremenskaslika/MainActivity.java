@@ -3,6 +3,7 @@ package com.example.vremenskaslika;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private final String radarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm-anim.gif";
     private final String stillRadarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm.gif";
     private final int gifLength = 5750;
-
+    private final int updateAfter = 3;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -34,13 +36,18 @@ public class MainActivity extends AppCompatActivity {
         // Enable immersive fullscreen mode
         int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
+        Configuration config = getResources().getConfiguration();
+
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            flags |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+
         getWindow().getDecorView().setSystemUiVisibility(flags);
 
-        setContentView(R.layout.activity_main);
         setContentView(R.layout.activity_main);
 
         weatherImageView = findViewById(R.id.weatherImageView);
@@ -80,15 +87,16 @@ public class MainActivity extends AppCompatActivity {
                 loadImageFromUrl(imageLink);
             }
             refreshImage(imageLink); // Call the function again to refresh after x ms
-        }, gifLength);
+        }, gifLength * updateAfter);
     }
 
     private void loadImageFromUrl(String imageUrl) {
         Glide.with(this)
                 .load(imageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE) // Disable caching
+                .skipMemoryCache(true) // Skip memory cache as well
                 .into(new DrawableImageViewTarget(weatherImageView));
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
