@@ -11,6 +11,19 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/network"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/network_error"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/background"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="NotSibling" />
+
+    <TextView
         android:id="@+id/showStill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
