@@ -9,10 +9,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageView radarImageView;
     private ImageView stillRadarImageView;
 
+
+    private TextView utcTimeTextView;
+    private TextView showStill;
 
     private Handler mainHandler;
     private boolean isStillImageShown = false;
@@ -34,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
 
         super.onCreate(savedInstanceState);
 
@@ -54,25 +65,29 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        utcTimeTextView = findViewById(R.id.utcTimeTextView);
+        showStill = findViewById(R.id.showStill);
+
         radarImageView = findViewById(R.id.radarImageView);
         stillRadarImageView = findViewById(R.id.stillRadarImageView);
         background = findViewById(R.id.background);
 
+
         mainHandler = new Handler(Looper.getMainLooper());
 
         // Set touch listener for the image
-        radarImageView.setOnTouchListener(new View.OnTouchListener() {
+        showStill.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        // Finger pressed, show the still image
+                        // Finger pressed, show the stillRadarImage
                         loadImageFromUrl(stillRadarImageUrl, stillRadarImageView);
                         isStillImageShown = true;
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        // Remove image
+                        // Remove stillRadarImage
                         stillRadarImageView.setImageDrawable(null);
                         isStillImageShown = false;
                         break;
@@ -80,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        // Update UTC time every second
+        updateUTCTime();
 
         // Initial load of the image (load both so that it stays in ram)
         loadImageFromUrl(radarImageUrl, radarImageView);
@@ -90,6 +108,20 @@ public class MainActivity extends AppCompatActivity {
         try {Thread.sleep(gifLength / 2);}
         catch (InterruptedException e) {throw new RuntimeException(e);}
         refreshImage(stillRadarImageUrl, background);
+    }
+
+
+    @SuppressLint("SetTextI18n")
+    private void updateUTCTime() {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String utcTime = sdf.format(new Date());
+
+        // Update the TextView with the new UTC time
+        utcTimeTextView.setText("UTC čas:\n" + utcTime);
+
+        // Schedule the update again after 1 second
+        utcTimeTextView.postDelayed(this::updateUTCTime, 1000);
     }
 
     private void refreshImage(String imageLink, ImageView image) {
@@ -108,6 +140,14 @@ public class MainActivity extends AppCompatActivity {
                 .skipMemoryCache(true) // Skip memory cache as well
                 .into(new DrawableImageViewTarget(image));
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Remove stillRadarImage
+        stillRadarImageView.setImageDrawable(null);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
