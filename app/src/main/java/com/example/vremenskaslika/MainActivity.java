@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,20 +24,20 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView background;
     private ImageView radarImageView;
-    private ImageView stillRadarImageView;
 
 
     private TextView utcTimeTextView;
     private TextView showStill;
+
 
     private Handler mainHandler;
     private boolean isStillImageShown = false;
 
 
     private final String radarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm-anim.gif";
-    private final String stillRadarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm.gif";
+    private final String backgroundImage = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm.gif";
     private final int gifLength = 5750;
-
+    private final int updateAfter = 10;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -69,26 +68,23 @@ public class MainActivity extends AppCompatActivity {
         showStill = findViewById(R.id.showStill);
 
         radarImageView = findViewById(R.id.radarImageView);
-        stillRadarImageView = findViewById(R.id.stillRadarImageView);
         background = findViewById(R.id.background);
 
 
         mainHandler = new Handler(Looper.getMainLooper());
 
-        // Set touch listener for the image
+
         showStill.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        // Finger pressed, show the stillRadarImage
-                        loadImageFromUrl(stillRadarImageUrl, stillRadarImageView);
+                        radarImageView.setVisibility(View.GONE);
                         isStillImageShown = true;
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        // Remove stillRadarImage
-                        stillRadarImageView.setImageDrawable(null);
+                        radarImageView.setVisibility(View.VISIBLE);
                         isStillImageShown = false;
                         break;
                 }
@@ -100,14 +96,15 @@ public class MainActivity extends AppCompatActivity {
         updateUTCTime();
 
         // Initial load of the image (load both so that it stays in ram)
+        loadImageFromUrl(backgroundImage, background);
         loadImageFromUrl(radarImageUrl, radarImageView);
-        loadImageFromUrl(stillRadarImageUrl, background);
+
 
         // Schedule image refresh every 5 seconds
         refreshImage(radarImageUrl, radarImageView);
         try {Thread.sleep(gifLength / 2);}
         catch (InterruptedException e) {throw new RuntimeException(e);}
-        refreshImage(stillRadarImageUrl, background);
+        refreshImage(backgroundImage, background);
     }
 
 
@@ -130,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                 loadImageFromUrl(imageLink, image);
             }
             refreshImage(imageLink, image); // Call the function again to refresh after x ms
-        }, gifLength);
+        }, gifLength * updateAfter);
     }
 
     private void loadImageFromUrl(String imageUrl, ImageView image) {
@@ -141,12 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 .into(new DrawableImageViewTarget(image));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Remove stillRadarImage
-        stillRadarImageView.setImageDrawable(null);
-    }
 
     @Override
     protected void onDestroy() {

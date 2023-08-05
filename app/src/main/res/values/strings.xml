@@ -2,7 +2,6 @@
     <string name="app_name">Radarska slika</string>
     <string name="radarimage_image">RadarImage Image</string>
     <string name="background_image">Background Image</string>
-    <string name="stillradar_image">StillRadar Image</string>
     <string name="zadnja_slika">Zadnja\nslika</string>
     <string name="utc_00_00_00">UTC čas:\n00:00:00</string>
 </resources>
