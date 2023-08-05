@@ -9,11 +9,31 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:id="@+id/weatherImageView"
+        android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
-        android:contentDescription="Weather Image"
+        android:contentDescription="@string/background_image"
+        android:scaleType="fitCenter"
+        tools:layout_editor_absoluteX="-198dp"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <ImageView
+        android:id="@+id/radarImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/radarimage_image"
+        android:scaleType="fitCenter"
+        tools:layout_editor_absoluteX="-198dp"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <ImageView
+        android:id="@+id/stillRadarImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/stillradar_image"
         android:scaleType="fitCenter"
         tools:layout_editor_absoluteX="-198dp"
         tools:layout_editor_absoluteY="0dp" />

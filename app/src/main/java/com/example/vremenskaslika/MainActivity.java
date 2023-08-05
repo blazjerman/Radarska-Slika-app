@@ -16,7 +16,11 @@ import com.bumptech.glide.request.target.DrawableImageViewTarget;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView weatherImageView;
+    private ImageView background;
+    private ImageView radarImageView;
+    private ImageView stillRadarImageView;
+
+
     private Handler mainHandler;
     private boolean isStillImageShown = false;
 
@@ -24,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private final String radarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm-anim.gif";
     private final String stillRadarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm.gif";
     private final int gifLength = 5750;
-    private final int updateAfter = 3;
+
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -50,23 +54,26 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        weatherImageView = findViewById(R.id.weatherImageView);
+        radarImageView = findViewById(R.id.radarImageView);
+        stillRadarImageView = findViewById(R.id.stillRadarImageView);
+        background = findViewById(R.id.background);
+
         mainHandler = new Handler(Looper.getMainLooper());
 
         // Set touch listener for the image
-        weatherImageView.setOnTouchListener(new View.OnTouchListener() {
+        radarImageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         // Finger pressed, show the still image
-                        loadImageFromUrl(stillRadarImageUrl);
+                        loadImageFromUrl(stillRadarImageUrl, stillRadarImageView);
                         isStillImageShown = true;
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        // Finger released, restore the original image
-                        loadImageFromUrl(radarImageUrl);
+                        // Remove image
+                        stillRadarImageView.setImageDrawable(null);
                         isStillImageShown = false;
                         break;
                 }
@@ -75,27 +82,31 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initial load of the image (load both so that it stays in ram)
-        loadImageFromUrl(radarImageUrl);
+        loadImageFromUrl(radarImageUrl, radarImageView);
+        loadImageFromUrl(stillRadarImageUrl, background);
 
         // Schedule image refresh every 5 seconds
-        refreshImage(radarImageUrl);
+        refreshImage(radarImageUrl, radarImageView);
+        try {Thread.sleep(gifLength / 2);}
+        catch (InterruptedException e) {throw new RuntimeException(e);}
+        refreshImage(stillRadarImageUrl, background);
     }
 
-    private void refreshImage(String imageLink) {
+    private void refreshImage(String imageLink, ImageView image) {
         mainHandler.postDelayed(() -> {
             if (!isStillImageShown) {
-                loadImageFromUrl(imageLink);
+                loadImageFromUrl(imageLink, image);
             }
-            refreshImage(imageLink); // Call the function again to refresh after x ms
-        }, gifLength * updateAfter);
+            refreshImage(imageLink, image); // Call the function again to refresh after x ms
+        }, gifLength);
     }
 
-    private void loadImageFromUrl(String imageUrl) {
+    private void loadImageFromUrl(String imageUrl, ImageView image) {
         Glide.with(this)
                 .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.NONE) // Disable caching
                 .skipMemoryCache(true) // Skip memory cache as well
-                .into(new DrawableImageViewTarget(weatherImageView));
+                .into(new DrawableImageViewTarget(image));
     }
     @Override
     protected void onDestroy() {
