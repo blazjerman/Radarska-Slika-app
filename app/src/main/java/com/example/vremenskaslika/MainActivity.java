@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
 
-
         setContentView(R.layout.activity_main);
 
         //Setup thread  for updates
@@ -102,10 +101,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        showStill.setTextColor(0xFF000000);//Set text to black
                         radarImageView.setVisibility(View.GONE);
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
+                        showStill.setTextColor(0xFFFFFFFF);//Set text back to white
                         radarImageView.setVisibility(View.VISIBLE);
                         break;
                 }
@@ -117,13 +118,7 @@ public class MainActivity extends AppCompatActivity {
         updateUTCTime();
 
         // Start image updating
-        refreshImage(radarImageUrl, radarImageView, fastRefresh);
-        try {
-            Thread.sleep(gifLength / 2);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        refreshImage(backgroundImage, background, fastRefresh);
+        refreshImage(fastRefresh);
     }
 
 
@@ -142,16 +137,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void refreshImage(String imageLink, ImageView image,long refresh) {
+    private void refreshImage(long refresh) {
         mainHandler.postDelayed(() -> {
-            if(isDestroyed())return;
-            if(!isNetworkOnline()){
-                refreshImage(imageLink, image, fastRefresh);
+
+            if (isDestroyed()) return;
+
+            if (!isNetworkOnline()) {
+                refreshImage(fastRefresh);
+                return;
             }
-            else{
-                loadImageFromUrl(imageLink, image);
-                refreshImage(imageLink, image, (long) gifLength * updateAfter);
-            }
+
+            loadImageFromUrl(backgroundImage, background);
+
+            //Delayed second image
+            mainHandler.postDelayed(() -> {
+                if (isDestroyed()) return;
+                loadImageFromUrl(radarImageUrl, radarImageView);
+            }, fastRefresh * fastRefresh);
+
+            refreshImage((long) gifLength * updateAfter);
 
         }, refresh);
     }
@@ -163,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
                 .diskCacheStrategy(DiskCacheStrategy.NONE) // Disable caching
                 .skipMemoryCache(true) // Skip memory cache as well
                 .into(new DrawableImageViewTarget(image));
-
     }
 
     public boolean isNetworkOnline() {
