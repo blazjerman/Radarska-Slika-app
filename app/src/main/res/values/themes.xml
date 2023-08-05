@@ -1,7 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.VremenskaSlika" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+    <style name="Theme.VremenskaSlika" parent="Theme.MaterialComponents.DayNight">
 
+        <item name="colorPrimary">#0AA9FF</item>
         <item name="android:statusBarColor">#2196F3</item>
 
     </style>

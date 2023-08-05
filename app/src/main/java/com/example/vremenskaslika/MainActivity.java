@@ -43,9 +43,23 @@ public class MainActivity extends AppCompatActivity {
 
     private final int fastRefresh = 10;//In milliseconds
 
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
+        setContentView(R.layout.activity_main);
+
+        //Setup thread  for updates
+        Thread setUpdates = new Thread(new Runnable() {
+            @Override
+            public void run() {setupUpdates();}}
+        );
+
+
+        setUpdates.start();
 
 
         super.onCreate(savedInstanceState);
@@ -65,7 +79,13 @@ public class MainActivity extends AppCompatActivity {
 
         getWindow().getDecorView().setSystemUiVisibility(flags);
 
-        setContentView(R.layout.activity_main);
+
+    }
+
+
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupUpdates(){
 
         utcTimeTextView = findViewById(R.id.utcTimeTextView);
         showStill = findViewById(R.id.showStill);
@@ -93,15 +113,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Update UTC time every second
+        // Start UTC updating
         updateUTCTime();
 
-
-        // Schedule image refresh every 5 seconds
-        refreshImage(radarImageUrl, radarImageView,fastRefresh);
-        try {Thread.sleep(gifLength / 2);}catch (InterruptedException e) {throw new RuntimeException(e);}
+        // Start image updating
+        refreshImage(radarImageUrl, radarImageView, fastRefresh);
+        try {
+            Thread.sleep(gifLength / 2);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         refreshImage(backgroundImage, background, fastRefresh);
     }
+
 
 
     @SuppressLint("SetTextI18n")
@@ -119,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void refreshImage(String imageLink, ImageView image,long refresh) {
-
         mainHandler.postDelayed(() -> {
+            if(isDestroyed())return;
             if(!isNetworkOnline()){
                 refreshImage(imageLink, image, fastRefresh);
             }
@@ -157,3 +181,5 @@ public class MainActivity extends AppCompatActivity {
         mainHandler.removeCallbacksAndMessages(null); // Remove callbacks to prevent leaks
     }
 }
+
+
