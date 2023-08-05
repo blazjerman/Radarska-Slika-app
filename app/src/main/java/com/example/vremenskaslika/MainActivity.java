@@ -3,7 +3,10 @@ package com.example.vremenskaslika;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,14 +34,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Handler mainHandler;
-    private boolean isStillImageShown = false;
-
 
     private final String radarImageUrl = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm-anim.gif";
     private final String backgroundImage = "https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm.gif";
-    private final int gifLength = 5750;
-    private final int updateAfter = 10;
+    private final int gifLength = 5750;//In milliseconds
+    private final int updateAfter = 5;
 
+
+    private final int fastRefresh = 10;//In milliseconds
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -80,12 +83,10 @@ public class MainActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         radarImageView.setVisibility(View.GONE);
-                        isStillImageShown = true;
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
                         radarImageView.setVisibility(View.VISIBLE);
-                        isStillImageShown = false;
                         break;
                 }
                 return true;
@@ -95,16 +96,11 @@ public class MainActivity extends AppCompatActivity {
         // Update UTC time every second
         updateUTCTime();
 
-        // Initial load of the image (load both so that it stays in ram)
-        loadImageFromUrl(backgroundImage, background);
-        loadImageFromUrl(radarImageUrl, radarImageView);
-
 
         // Schedule image refresh every 5 seconds
-        refreshImage(radarImageUrl, radarImageView);
-        try {Thread.sleep(gifLength / 2);}
-        catch (InterruptedException e) {throw new RuntimeException(e);}
-        refreshImage(backgroundImage, background);
+        refreshImage(radarImageUrl, radarImageView,fastRefresh);
+        try {Thread.sleep(gifLength / 2);}catch (InterruptedException e) {throw new RuntimeException(e);}
+        refreshImage(backgroundImage, background, fastRefresh);
     }
 
 
@@ -121,23 +117,39 @@ public class MainActivity extends AppCompatActivity {
         utcTimeTextView.postDelayed(this::updateUTCTime, 1000);
     }
 
-    private void refreshImage(String imageLink, ImageView image) {
+
+    private void refreshImage(String imageLink, ImageView image,long refresh) {
+
         mainHandler.postDelayed(() -> {
-            if (!isStillImageShown) {
-                loadImageFromUrl(imageLink, image);
+            if(!isNetworkOnline()){
+                refreshImage(imageLink, image, fastRefresh);
             }
-            refreshImage(imageLink, image); // Call the function again to refresh after x ms
-        }, gifLength * updateAfter);
+            else{
+                loadImageFromUrl(imageLink, image);
+                refreshImage(imageLink, image, (long) gifLength * updateAfter);
+            }
+
+        }, refresh);
     }
 
     private void loadImageFromUrl(String imageUrl, ImageView image) {
+
         Glide.with(this)
                 .load(imageUrl)
                 .diskCacheStrategy(DiskCacheStrategy.NONE) // Disable caching
                 .skipMemoryCache(true) // Skip memory cache as well
                 .into(new DrawableImageViewTarget(image));
+
     }
 
+    public boolean isNetworkOnline() {
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null) {
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        }
+        return false;
+    }
 
     @Override
     protected void onDestroy() {
