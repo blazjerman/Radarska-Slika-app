@@ -52,6 +52,37 @@
         app:layout_constraintTop_toTopOf="@+id/background"
         app:layout_constraintVertical_bias="0.16000003" />
 
+    <TextView
+        android:id="@+id/arso"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text='@string/arso_text'
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.03"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/background"
+        app:layout_constraintVertical_bias="0.84000003" />
+
+
+    <TextView
+        android:id="@+id/arsoLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text='@string/spletna_stran'
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.967"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/background"
+        app:layout_constraintVertical_bias="0.84"
+        android:clickable="true"
+        android:onClick="openLink"/>
+
     <ImageView
         android:id="@+id/background"
         android:layout_width="match_parent"
@@ -69,7 +100,7 @@
         android:adjustViewBounds="true"
         android:contentDescription="@string/radarimage_image"
         android:scaleType="fitCenter"
-        tools:layout_editor_absoluteX="-198dp"
-        tools:layout_editor_absoluteY="0dp" />
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="263dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

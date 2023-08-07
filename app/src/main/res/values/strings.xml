@@ -5,4 +5,6 @@
     <string name="zadnja_slika">Zadnja\nslika</string>
     <string name="utc_00_00_00">UTC čas:\n00:00:00</string>
     <string name="network_error">Nalagam...</string>
+    <string name="arso_text">Vir: ARSO\n </string>
+    <string name="spletna_stran">Spletnan\nstran</string>
 </resources>
